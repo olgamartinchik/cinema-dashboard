@@ -22,10 +22,21 @@ export const theme = createTheme({
     h1: {
       fontSize: '2rem',
       fontWeight: 600,
+      marginBottom: '24px',
+      marginTop: '20px',
     },
     h2: {
       fontSize: '1.75rem',
       fontWeight: 500,
+      marginBottom: '20px',
+      marginTop: '20px',
+    },
+    h3: {
+      fontSize: '1.5rem',
+      fontWeight: 500,
+      color: '#757575',
+      letterSpacing: '0.5px',
+      marginBottom: '16px',
     },
     body1: {
       fontSize: '1rem',

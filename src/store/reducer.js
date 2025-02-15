@@ -9,7 +9,7 @@ export const reducer = (state, action) => {
           ...state.newCategories,
           {
             ...action.payload,
-            id: null, // Задаем id как null для новой категории
+            id: null,
             subCategories: [],
           },
         ],
@@ -61,7 +61,7 @@ export const reducer = (state, action) => {
                 ...cat,
                 subCategories: [
                   ...cat.subCategories,
-                  { ...action.payload.subCategory, id: null, filmIds: [] }, // Задаем id как null для новой подкатегории
+                  { ...action.payload.subCategory, id: null, filmIds: [] },
                 ],
               }
             : cat
@@ -72,7 +72,7 @@ export const reducer = (state, action) => {
                 ...cat,
                 subCategories: [
                   ...cat.subCategories,
-                  { ...action.payload.subCategory, id: null, filmIds: [] }, // Задаем id как null для новой подкатегории
+                  { ...action.payload.subCategory, id: null, filmIds: [] },
                 ],
               }
             : cat
@@ -83,7 +83,7 @@ export const reducer = (state, action) => {
                 ...cat,
                 updatedSubCategories: [
                   ...cat.updatedSubCategories,
-                  { ...action.payload.subCategory, id: null, filmIds: [] }, // Задаем id как null для новой подкатегории
+                  { ...action.payload.subCategory, id: null, filmIds: [] },
                 ],
               }
             : cat

@@ -1,9 +1,13 @@
 import styled from '@emotion/styled';
 
 export const Page = styled.div`
-  display: grid;
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
   flex: 1;
   overflow: hidden;
-  grid-template-columns: minmax(260px, 1fr) 4fr;
+  height: 100%;
+  width: 100%;
 `;
