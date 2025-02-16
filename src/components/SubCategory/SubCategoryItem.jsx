@@ -15,6 +15,7 @@ export const SubCategoryItem = ({ subCategory }) => {
   return (
     <Box>
       <Typography variant='h3'>Subсategory: {subCategory.name}</Typography>
+      <Typography variant='h4'>Films: </Typography>
 
       {films.length ? (
         <List>

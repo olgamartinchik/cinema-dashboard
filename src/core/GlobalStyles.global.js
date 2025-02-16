@@ -38,6 +38,24 @@ export const theme = createTheme({
       letterSpacing: '0.5px',
       marginBottom: '16px',
     },
+    h4: {
+      fontSize: '1.25rem',
+      fontWeight: 500,
+      marginBottom: '14px',
+      marginTop: '14px',
+    },
+    h5: {
+      fontSize: '1rem',
+      fontWeight: 500,
+      marginBottom: '12px',
+      marginTop: '12px',
+    },
+    h6: {
+      fontSize: '0.875rem',
+      fontWeight: 500,
+      marginBottom: '10px',
+      marginTop: '10px',
+    },
     body1: {
       fontSize: '1rem',
     },

@@ -13,7 +13,7 @@ export const Category = () => {
 
   const category = name
     ? [...state.categories, ...state.newCategories].find(
-        (category) => category.name.toLocaleLowerCase().trim() === name
+        (category) => category.name.trim() === name
       )
     : null;
 

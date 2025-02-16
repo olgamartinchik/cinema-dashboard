@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   TextField,
   Box,
@@ -17,13 +17,16 @@ import {
   deleteSubCategory,
   saveCategories,
 } from '../../store/actions';
+import { CustomDivider } from '../../shared/CustomDivider.styled';
 
 export const CategoryForm = ({ films, onAction, category = null }) => {
-  const { dispatch } = useCategoryContext();
+  const { state, dispatch } = useCategoryContext();
   const [categoryName, setCategoryName] = useState(category?.name || '');
   const [subCategories, setSubCategories] = useState(
     category?.subCategories || []
   );
+  const [categoryError, setCategoryError] = useState('');
+  const [subCategoryErrors, setSubCategoryErrors] = useState([]);
 
   useEffect(() => {
     if (category) {
@@ -31,7 +34,72 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
       setSubCategories(category.subCategories);
     }
   }, [category]);
+  const validateCategoryName = useCallback(
+    (name) => {
+      const allCategories = [...state.categories, ...state.newCategories];
+      const duplicate = allCategories.some(
+        (existingCategory) =>
+          existingCategory.name === name && existingCategory.id !== category?.id
+      );
+      setCategoryError(duplicate ? 'Category name already exists' : '');
+    },
+    [state.categories, state.newCategories, category]
+  );
 
+  const validateSubCategoryNames = useCallback(() => {
+    const errors = subCategories.map((subCategory, index) => {
+      const duplicate = subCategories.some(
+        (existingSubCategory, i) =>
+          existingSubCategory.name === subCategory.name && i !== index
+      );
+      return duplicate ? 'Subcategory name already exists' : '';
+    });
+    setSubCategoryErrors(errors);
+  }, [subCategories]);
+
+  useEffect(() => {
+    validateCategoryName(categoryName);
+  }, [categoryName, validateCategoryName]);
+
+  useEffect(() => {
+    validateSubCategoryNames();
+  }, [subCategories, validateSubCategoryNames]);
+  // useEffect(() => {
+  //   validateCategoryName(categoryName);
+  // }, [categoryName]);
+
+  // useEffect(() => {
+  //   validateSubCategoryNames(subCategories);
+  // }, [subCategories]);
+
+  // const validateCategoryName = (name) => {
+  //   const duplicate = allCategories.some(
+  //     (existingCategory) =>
+  //       existingCategory.name === name && existingCategory.id !== category?.id
+  //   );
+  //   if (duplicate) {
+  //     setCategoryError('Category name already exists');
+  //   } else {
+  //     setCategoryError('');
+  //   }
+  // };
+
+  // const validateSubCategoryNames = (subCategories) => {
+  //   const errors = subCategories.map((subCategory, index) => {
+  //     const duplicate = subCategories.some(
+  //       (existingSubCategory, i) =>
+  //         existingSubCategory.name === subCategory.name && i !== index
+  //     );
+  //     return duplicate ? 'Subcategory name already exists' : '';
+  //   });
+  //   setSubCategoryErrors(errors);
+  // };
+
+  const handleCategoryNameChange = (e) => {
+    const name = e.target.value;
+    setCategoryName(name);
+    validateCategoryName(name);
+  };
   const handleAddSubCategory = () => {
     const newSubCategory = { id: null, name: '', filmIds: [] };
     setSubCategories((prevSubCategories) => [
@@ -51,17 +119,17 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
       i === index ? { ...subCategory, name: newName } : subCategory
     );
     setSubCategories(updatedSubCategories);
+    validateSubCategoryNames(updatedSubCategories);
   };
 
   const handleAddFilmToSubCategory = (index, filmId) => {
     const updatedSubCategories = subCategories.map((subCategory, i) =>
-      i === index
+      i === index && !subCategory.filmIds.includes(filmId)
         ? { ...subCategory, filmIds: [...subCategory.filmIds, filmId] }
         : subCategory
     );
     setSubCategories(updatedSubCategories);
   };
-
   const handleRemoveFilmFromSubCategory = (subIndex, filmId) => {
     const updatedSubCategories = subCategories.map((subCategory, i) =>
       i === subIndex
@@ -74,18 +142,10 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
     setSubCategories(updatedSubCategories);
   };
 
-  // const hasErrors =
-  //   !!errors.category || Object.values(errors.subCategories).some((err) => err);
-
   const handleSave = () => {
     if (!category) {
       dispatch(addCategory({ id: null, name: categoryName, subCategories }));
     } else {
-      console.log({
-        id: category.id || null,
-        name: categoryName || category.name,
-        subCategories,
-      });
       dispatch(
         updateCategory({
           id: category.id || null,
@@ -94,15 +154,6 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
         })
       );
     }
-    // if (category) {
-    //   dispatch(
-    //     updateCategory({
-    //       category,
-    //     })
-    //   );
-    // }
-    // if (hasErrors) return;
-    // onSave({ id: category?.id || null, name: categoryName, subCategories });
 
     dispatch(saveCategories());
     onAction();
@@ -113,9 +164,12 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
     dispatch(saveCategories());
     onAction();
   };
+
+  const hasErrors = !!categoryError || subCategoryErrors.some((error) => error);
+
   return (
     <Box>
-      <Typography variant='h1'>
+      <Typography variant='h2'>
         {category
           ? `Edit ${category.name.toUpperCase()} Category`
           : 'Create New Category'}
@@ -126,15 +180,17 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
           variant='outlined'
           fullWidth
           value={categoryName}
-          onChange={(e) => setCategoryName(e.target.value)}
+          onChange={(e) => handleCategoryNameChange(e)}
           margin='normal'
+          error={!!categoryError}
+          helperText={categoryError}
         />
       )}
 
       <Box>
-        <Typography variant='h5'>Subcategories:</Typography>
         {subCategories.map((subCategory, index) => (
           <Box key={index}>
+            <Typography variant='h3'>Subcategory:</Typography>
             <TextField
               label={`Subcategory Name ${index + 1}`}
               variant='outlined'
@@ -143,10 +199,12 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
                 handleChangeSubCategoryName(index, e.target.value)
               }
               margin='normal'
+              error={!!subCategoryErrors[index]}
+              helperText={subCategoryErrors[index]}
             />
 
             <Box>
-              <Typography variant='h6'>Films:</Typography>
+              <Typography variant='h4'>Films:</Typography>
               {subCategory.filmIds.map((filmId, filmIndex) => {
                 const film = films.find((film) => film.id === filmId);
                 return (
@@ -163,6 +221,7 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
                       variant='outlined'
                       color='error'
                       margin='8px'
+                      disabled={hasErrors}
                     >
                       Remove
                     </StyledButton>
@@ -192,9 +251,11 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
               variant='outlined'
               color='error'
               margin='8px 0 0 0'
+              disabled={hasErrors}
             >
               Delete Subcategory
             </StyledButton>
+            <CustomDivider />
           </Box>
         ))}
         <StyledButton
@@ -202,16 +263,18 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
           variant='contained'
           color='outlined'
           margin='16px 0 0 0'
+          disabled={hasErrors}
         >
-          Add Subcategory
+          Add New Subcategory
         </StyledButton>
       </Box>
       {category && (
         <StyledButton
           onClick={handleDelete}
-          variant='outlined'
+          variant='contained'
           color='error'
           margin='16px 15px 0 0'
+          disabled={hasErrors}
         >
           Delete Category
         </StyledButton>
@@ -221,7 +284,7 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
         variant='contained'
         color='primary'
         margin='16px 0 0 0'
-        // disabled={hasErrors}
+        disabled={hasErrors}
       >
         Save
       </StyledButton>
