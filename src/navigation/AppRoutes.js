@@ -8,7 +8,7 @@ export const AppRoutes = () => {
       <Route path='/' element={<Navigate to='categories' />} />
       <Route path='/categories' element={<Categories />} />
 
-      <Route path='/categories/:id' element={<Category />} />
+      <Route path='/categories/:name' element={<Category />} />
 
       <Route path='/categories/new' element={<Category />} />
     </Routes>

@@ -10,8 +10,8 @@ export const Categories = () => {
   const [categories, setCategories] = useState(state.categories);
 
   useEffect(() => {
-    setCategories(state.categories);
-  }, [state.categories]);
+    setCategories([...state.categories, ...state.newCategories]);
+  }, [state.categories, state.newCategories]);
   return (
     <Page>
       <Link to='/categories/new'>
@@ -20,8 +20,8 @@ export const Categories = () => {
         </Button>
       </Link>
       {categories.length &&
-        categories.map((category) => (
-          <CategoryItem key={category.id} category={category} />
+        categories.map((category, ind) => (
+          <CategoryItem key={ind} category={category} />
         ))}
     </Page>
   );

@@ -10,165 +10,122 @@ export const reducer = (state, action) => {
           {
             ...action.payload,
             id: null,
-            subCategories: [],
+            subCategories: action.payload.subCategories.map((subCategory) => ({
+              ...subCategory,
+              id: null,
+              filmIds: subCategory.filmIds || [],
+            })),
           },
         ],
       };
-
     case ActionTypes.UPDATE_CATEGORY:
-      return {
-        ...state,
-        categories: state.categories.map((cat) =>
-          cat.id === action.payload.id ? { ...cat, ...action.payload } : cat
-        ),
-        updatedCategories: state.updatedCategories.some(
-          (cat) => cat.id === action.payload.id
-        )
-          ? state.updatedCategories.map((cat) =>
-              cat.id === action.payload.id ? { ...cat, ...action.payload } : cat
-            )
-          : [
-              ...state.updatedCategories,
-              {
-                ...action.payload,
-                updatedSubCategories: [],
-                deletedSubCategories: [],
-              },
-            ],
-      };
+      const { subCategories, ...rest } = action.payload;
+      if (action.payload.id === null) {
+        const categoryNameLower = action.payload.name;
+        return {
+          ...state,
+          newCategories: state.newCategories.map((cat) =>
+            cat.name === categoryNameLower ? { ...cat, ...action.payload } : cat
+          ),
+        };
+      } else {
+        return {
+          ...state,
+
+          updatedCategories: state.updatedCategories.some(
+            (cat) => cat.id === action.payload.id
+          )
+            ? state.updatedCategories.map((cat) =>
+                cat.id === action.payload.id
+                  ? { ...cat, ...rest, updatedSubCategories: subCategories }
+                  : cat
+              )
+            : [
+                ...state.updatedCategories,
+                {
+                  ...rest,
+                  updatedSubCategories: subCategories || [],
+                },
+              ],
+          categories: state.categories.map((cat) =>
+            cat.id === action.payload.id
+              ? {
+                  ...cat,
+                  ...action.payload,
+                }
+              : cat
+          ),
+        };
+      }
 
     case ActionTypes.DELETE_CATEGORY:
-      return {
-        ...state,
-        categories: state.categories.filter(
-          (cat) => cat.id !== action.payload.id
-        ),
-        deletedCategories:
-          action.payload.id !== null
-            ? [...state.deletedCategories, { id: action.payload.id }]
-            : state.deletedCategories,
-        newCategories: state.newCategories.filter(
-          (cat) => cat.id !== action.payload.id
-        ),
-      };
+      if (action.payload.id === null) {
+        return {
+          ...state,
+          newCategories: state.newCategories.filter(
+            (cat) => cat.name !== action.payload.name
+          ),
+        };
+      } else {
+        return {
+          ...state,
+          categories: state.categories.filter(
+            (cat) => cat.id !== action.payload.id
+          ),
+          updatedCategories: state.updatedCategories.filter(
+            (cat) => cat.id !== action.payload.id
+          ),
+          deletedCategories: [
+            ...state.deletedCategories,
+            { id: action.payload.id },
+          ],
+        };
+      }
 
-    case ActionTypes.ADD_SUBCATEGORY:
-      return {
-        ...state,
-        categories: state.categories.map((cat) =>
-          cat.id === action.payload.categoryId
-            ? {
-                ...cat,
-                subCategories: [
-                  ...cat.subCategories,
-                  { ...action.payload.subCategory, id: null, filmIds: [] },
-                ],
-              }
-            : cat
-        ),
-        newCategories: state.newCategories.map((cat) =>
-          cat.id === action.payload.categoryId
-            ? {
-                ...cat,
-                subCategories: [
-                  ...cat.subCategories,
-                  { ...action.payload.subCategory, id: null, filmIds: [] },
-                ],
-              }
-            : cat
-        ),
-        updatedCategories: state.updatedCategories.map((cat) =>
-          cat.id === action.payload.categoryId && cat.id !== null
-            ? {
-                ...cat,
-                updatedSubCategories: [
-                  ...cat.updatedSubCategories,
-                  { ...action.payload.subCategory, id: null, filmIds: [] },
-                ],
-              }
-            : cat
-        ),
-      };
+    case ActionTypes.DELETE_SUBCATEGORY: {
+      const { category, subCategory } = action.payload;
 
-    case ActionTypes.DELETE_SUBCATEGORY:
       return {
         ...state,
-        categories: state.categories.map((cat) =>
-          cat.id === action.payload.categoryId
+        categories: state.categories.map((c) =>
+          c.id === category.id || c.name === category.name
             ? {
-                ...cat,
-                subCategories: cat.subCategories.filter(
-                  (sub) => sub.id !== action.payload.subCategoryId
+                ...c,
+                subCategories: c.subCategories.filter(
+                  (s) =>
+                    !(s.id === subCategory.id || s.name === subCategory.name)
                 ),
               }
-            : cat
+            : c
         ),
-        updatedCategories: state.updatedCategories.map((cat) =>
-          cat.id === action.payload.categoryId
-            ? {
-                ...cat,
-                deletedSubCategories:
-                  action.payload.subCategoryId !== null
-                    ? [
-                        ...cat.deletedSubCategories,
-                        { id: action.payload.subCategoryId },
-                      ]
-                    : cat.deletedSubCategories,
-              }
-            : cat
-        ),
-        newCategories: state.newCategories.map((cat) =>
-          cat.id === action.payload.categoryId
-            ? {
-                ...cat,
-                subCategories: cat.subCategories.filter(
-                  (sub) => sub.id !== action.payload.subCategoryId
-                ),
-              }
-            : cat
-        ),
-      };
 
-    case ActionTypes.UPDATE_SUBCATEGORY_FILMS:
-      return {
-        ...state,
-        categories: state.categories.map((cat) =>
-          cat.id === action.payload.categoryId
+        newCategories: state.newCategories.map((c) =>
+          c.name === category.name
             ? {
-                ...cat,
-                subCategories: cat.subCategories.map((sub) =>
-                  sub.id === action.payload.subCategoryId
-                    ? { ...sub, filmIds: action.payload.filmIds }
-                    : sub
+                ...c,
+                subCategories: c.subCategories.filter(
+                  (s) => s.name !== subCategory.name
                 ),
               }
-            : cat
+            : c
         ),
-        updatedCategories: state.updatedCategories.map((cat) =>
-          cat.id === action.payload.categoryId
+
+        updatedCategories: state.updatedCategories.map((c) =>
+          c.id === category.id || c.name === category.name
             ? {
-                ...cat,
-                updatedSubCategories: cat.updatedSubCategories.some(
-                  (sub) => sub.id === action.payload.subCategoryId
-                )
-                  ? cat.updatedSubCategories.map((sub) =>
-                      sub.id === action.payload.subCategoryId
-                        ? { ...sub, filmIds: action.payload.filmIds }
-                        : sub
-                    )
-                  : action.payload.subCategoryId !== null
-                  ? [
-                      ...cat.updatedSubCategories,
-                      {
-                        id: action.payload.subCategoryId,
-                        filmIds: action.payload.filmIds,
-                      },
-                    ]
-                  : cat.updatedSubCategories,
+                ...c,
+                updatedSubCategories: (c.updatedSubCategories || []).filter(
+                  (s) =>
+                    !(s.id === subCategory.id || s.name === subCategory.name)
+                ),
+                deletedSubCategories: subCategory.id
+                  ? [...(c.deletedSubCategories || []), { id: subCategory.id }]
+                  : c.deletedSubCategories,
               }
-            : cat
+            : c
         ),
       };
+    }
 
     case ActionTypes.SAVE_CATEGORIES:
       console.log({

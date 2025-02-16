@@ -11,16 +11,16 @@ export const CategoryItem = ({ category }) => {
       <Box>
         <Typography variant='h2'>
           Category: {category.name}{' '}
-          <Link to={`/categories/${category.id}`}>
-            <Button variant='outline' color='secondary'>
+          <Link to={`/categories/${category.name.trim()}`}>
+            <Button variant='outlined' color='secondary'>
               Edit
             </Button>
           </Link>
         </Typography>
 
         {category.subCategories.length &&
-          category.subCategories.map((subCategory) => (
-            <SubCategoryItem key={subCategory.id} subCategory={subCategory} />
+          category.subCategories.map((subCategory, ind) => (
+            <SubCategoryItem key={ind} subCategory={subCategory} />
           ))}
       </Box>
       <CustomDivider />
