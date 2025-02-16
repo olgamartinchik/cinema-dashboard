@@ -1,4 +1,5 @@
 [Деплой проекта](https://cinema-dashboard.netlify.app/categories)
+[ТЗ](https://butter-wanderer-da2.notion.site/frontend-164b5f12da6180de8ab5f194ddf32b0c)
 
 # Выполненное ТЗ
 
