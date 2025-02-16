@@ -64,36 +64,6 @@ export const CategoryForm = ({ films, onAction, category = null }) => {
   useEffect(() => {
     validateSubCategoryNames();
   }, [subCategories, validateSubCategoryNames]);
-  // useEffect(() => {
-  //   validateCategoryName(categoryName);
-  // }, [categoryName]);
-
-  // useEffect(() => {
-  //   validateSubCategoryNames(subCategories);
-  // }, [subCategories]);
-
-  // const validateCategoryName = (name) => {
-  //   const duplicate = allCategories.some(
-  //     (existingCategory) =>
-  //       existingCategory.name === name && existingCategory.id !== category?.id
-  //   );
-  //   if (duplicate) {
-  //     setCategoryError('Category name already exists');
-  //   } else {
-  //     setCategoryError('');
-  //   }
-  // };
-
-  // const validateSubCategoryNames = (subCategories) => {
-  //   const errors = subCategories.map((subCategory, index) => {
-  //     const duplicate = subCategories.some(
-  //       (existingSubCategory, i) =>
-  //         existingSubCategory.name === subCategory.name && i !== index
-  //     );
-  //     return duplicate ? 'Subcategory name already exists' : '';
-  //   });
-  //   setSubCategoryErrors(errors);
-  // };
 
   const handleCategoryNameChange = (e) => {
     const name = e.target.value;
